@@ -1,48 +1,103 @@
-# KarobarAI
+# KarobarAI 🇵🇰
+### AI Service Orchestrator for Pakistan's Informal Economy
 
-KarobarAI is an AI service orchestrator designed for Pakistan's informal economy. It connects users with local service providers like plumbers, electricians, AC technicians, and more in cities like Karachi and Islamabad.
+KarobarAI is an agentic AI system that automates the end-to-end lifecycle of home service requests in Pakistan — from natural language input to provider matching, booking, follow-up, and dispute handling.
 
-## Features
+## Problem Statement
+Pakistan's informal economy relies on WhatsApp, phone calls and referrals to find plumbers, electricians, AC technicians and other home service providers. This causes missed opportunities, poor matching, unpredictable pricing and lack of trust.
 
-- **Natural Language Understanding (NLU)**: Users can interact in English, Urdu, or Roman Urdu (e.g., "mera AC kharab hai G-13 mein kal chahiye budget kam hai"). It extracts intent using the Gemini API.
-- **Smart Matching**: Filters and ranks providers based on user criteria (service, location, urgency, budget).
-- **Booking Simulation**: Manages availability for providers.
+KarobarAI solves this by letting users simply say what they need in Urdu, Roman Urdu or English — and the system handles everything automatically.
 
-## Project Structure
+## Demo
+User types: "AC bilkul kaam nahi kar raha, kal subah G-13 mein chahiye, budget kam hai"
+System understands, matches best provider, shows price breakdown, books, sends reminder, collects feedback.
 
-- `providers.json`: Mock dataset of 15 local service providers with fields capturing reliability, price, and availability.
-- `nlu.py`: The Gemini API integration to parse user requests and determine intent.
-- `agent.py`: The main entry point and agent logic for the orchestrator, featuring an interactive chat interface.
-- `matcher.py`: Contains the logic to filter and rank providers based on user criteria.
-- `booking.py`: Simulates the booking process, updating provider availability.
+## Architecture
+User Input (Urdu/Roman Urdu/English)
+↓
+NLU Layer (Gemini API + Keyword Fallback)
+↓
+Provider Matching Engine (6-factor scoring)
+↓
+Dynamic Pricing Calculator
+↓
+Booking Simulation + Lifecycle
+↓
+Follow-up + Feedback + Rating Update
 
-## Setup & Usage
+## Agent Workflow (Google Antigravity)
+Antigravity orchestrates the entire pipeline:
+- Intent understanding agent
+- Provider matching agent  
+- Pricing agent
+- Booking and lifecycle agent
+- Fallback and error recovery agent
 
-1. Install dependencies:
-   ```bash
-   pip install google-genai
-   ```
-2. Set your Gemini API key:
-   - On Windows: `set GEMINI_API_KEY=your_api_key_here`
-   - On Linux/Mac: `export GEMINI_API_KEY=your_api_key_here`
+## Files
+- `nlu.py` — Multilingual intent extraction using Gemini API with keyword fallback
+- `matcher.py` — 6-factor provider matching algorithm
+- `booking.py` — Dynamic pricing, booking simulation, lifecycle management
+- `agent.py` — Main orchestrator with chat interface
+- `app.py` — Flask REST API
+- `providers.json` — Mock dataset of 19 Pakistani service providers
 
-3. **Run the CLI agent:**
-   ```bash
-   python agent.py
-   ```
+## Matching Algorithm (6 Factors)
+| Factor | Weight |
+|--------|--------|
+| Rating | 30% |
+| On-time score | 25% |
+| Cancellation rate | 20% |
+| Experience years | 10% |
+| Price vs budget | 10% |
+| Availability | 5% |
 
-4. **Run the Flask API:**
-   ```bash
-   python app.py
-   ```
-   *Test the API using cURL or Postman:*
-   ```bash
-   curl -X POST http://localhost:5000/api/request \
-   -H "Content-Type: application/json" \
-   -d '{"message": "mera AC kharab hai G-13 mein kal chahiye budget kam hai", "complexity": "intermediate", "is_returning_user": true}'
-   ```
+## Dynamic Pricing
+- Base rate from provider
+- Urgency multiplier (1.3x for same day)
+- Complexity multiplier (1.5x complex, 1.2x intermediate)
+- Loyalty discount (5% for returning users)
 
-## Future Enhancements
-- Real-time availability tracking.
-- Dynamic pricing models.
+## Multilingual Support
+- English: "I need a plumber in DHA Karachi"
+- Roman Urdu: "AC kharab hai G-13 mein chahiye"
+- Urdu: Full Urdu text supported
+- Fallback: Keyword detection when API quota exceeded
 
+## Edge Cases Handled
+- Provider cancels → auto-rebooks next best provider
+- No provider available → clear error message
+- Low confidence input → asks followup question
+- All API keys exhausted → keyword fallback activates
+
+## Baseline Comparison
+| Feature | Simple App | KarobarAI |
+|---------|-----------|-----------|
+| Input | Form fields | Natural language |
+| Matching | Distance only | 6-factor AI scoring |
+| Pricing | Fixed | Dynamic with breakdown |
+| Cancellation | Manual | Auto-rebook |
+| Language | English only | Urdu/Roman Urdu/English |
+
+## Tech Stack
+- Google Antigravity (agent orchestration)
+- Gemini API (NLU)
+- Python/Flask (backend)
+- Lovable (frontend UI)
+
+## Setup
+```bash
+pip install -r requirements.txt
+# Add GEMINI_API_KEY_1 to .env file
+python app.py
+```
+
+## Privacy
+All provider data is synthetic mock data. No real personal information is used.
+
+## Limitations
+- Mock provider dataset (19 providers)
+- No real GPS tracking
+- Gemini free tier quota limits
+
+## Team
+Built for AISeekho2026 Antigravity Hackathon
