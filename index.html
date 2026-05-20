@@ -1342,6 +1342,85 @@
             0% { width: 0%; }
             100% { width: 100%; }
         }
+
+        /* Chat View & Message Bubble Styles */
+        .chat-message-box {
+            background: #f8faf9;
+            border-radius: 16px;
+            border: 1px solid var(--border-light);
+            height: 280px;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .chat-msg {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 13px;
+            line-height: 1.4;
+            display: inline-block;
+            word-wrap: break-word;
+        }
+
+        .chat-msg.agent {
+            background: white;
+            color: var(--text-main);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .chat-msg.user {
+            background: var(--primary);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .quick-reply-wrapper {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 0;
+            margin-bottom: 8px;
+            white-space: nowrap;
+        }
+
+        .quick-reply-chip {
+            background: var(--primary-light);
+            color: var(--primary-deep);
+            border: 1px solid rgba(0, 181, 68, 0.15);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        .quick-reply-chip:active {
+            transform: scale(0.95);
+            background: var(--primary);
+            color: white;
+        }
+        
+        .chat-system-msg {
+            align-self: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            background: #eee;
+            padding: 4px 10px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 4px 0;
+        }
     </style>
 </head>
 
@@ -1435,7 +1514,11 @@
                         <span class="label">Carpenter</span>
                     </div>
                     <div class="service-card s-painter" onclick="quickSearch('Painter')">
-                        <span class="emoji-icon">🎨</span>
+                        <svg class="emoji-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--c-paint-txt); margin-bottom: 8px;">
+                            <rect x="3" y="3" width="14" height="6" rx="2" fill="var(--c-paint-txt)" opacity="0.85"/>
+                            <path d="M17 6h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-7v4"/>
+                            <rect x="10" y="18" width="2" height="5" rx="0.5" fill="var(--c-paint-txt)"/>
+                        </svg>
                         <span class="label">Painter</span>
                     </div>
                 </div>
@@ -1450,7 +1533,7 @@
                         <option value="Electrician">⚡ Electrician</option>
                         <option value="Cleaner">🧹 Cleaner</option>
                         <option value="Carpenter">🪚 Carpenter</option>
-                        <option value="Painter">🎨 Painter</option>
+                        <option value="Painter">🪣 Painter</option>
                     </select>
                     <select class="dropdown-field" id="areaSelect">
                         <option value="">Select Area / علاقہ چنیں</option>
@@ -1558,20 +1641,60 @@
                         <div class="progress-bar-fill" id="gpsProgressBar"></div>
                     </div>
 
-                    <div style="display:flex;align-items:center;gap:12px;font-size:13px;color:var(--text-muted)">
+                    <div style="display:flex;align-items:center;gap:12px;font-size:13px;color:var(--text-muted);flex-wrap:wrap">
                         <span style="font-size:24px">🚗</span>
                         <div>
                             <div style="font-weight:700;color:var(--text-main)" id="gpsStatusHeadline">Ustaad is on their way</div>
                             <div style="font-size:11px" id="gpsSubText">Simulated live transit via GPS coordinates</div>
                         </div>
-                        <button class="action-btn-green" style="width:auto;padding:8px 16px;margin-left:auto;font-size:12px" onclick="triggerMockArrival()">
-                            ⚡ Force Arrive
-                        </button>
+                        <div style="display:flex;gap:6px;margin-left:auto;width:100%;justify-content:flex-end;margin-top:8px">
+                            <button class="back-btn" style="width:auto;padding:6px 12px;font-size:11px;border-color:#e53935;color:#e53935" onclick="triggerMockCancellation()">
+                                🚨 Simulate Provider Cancel
+                            </button>
+                            <button class="action-btn-green" style="width:auto;padding:6px 12px;font-size:11px" onclick="triggerMockArrival()">
+                                ⚡ Force Arrive
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 6. MORE / PROFILE TAB VIEW -->
+            <!-- 6. DISPUTES & SUPPORT TAB VIEW -->
+            <div id="supportView" class="tab-view hidden">
+                <div class="services-grid-title">Help & Disputes / مدد اور تنازعات</div>
+                
+                <div id="disputeSelectionContainer">
+                    <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;line-height:1.4">
+                        Aapke kisi order mein koi masla hai? Select the booking below to launch our automated dispute resolution system.
+                    </p>
+                    <div id="disputeBookingsList"></div>
+                </div>
+
+                <!-- Live Chat & Dispute Rebittal Container -->
+                <div id="disputeChatContainer" class="hidden">
+                    <div class="results-header" style="margin-bottom:12px">
+                        <div class="back-circle-btn" onclick="exitDisputeChat()">←</div>
+                        <div style="font-family:'Outfit',sans-serif;font-weight:700;font-size:14px" id="chatUstaadName">Live Dispute Support</div>
+                    </div>
+                    
+                    <div class="chat-message-box" id="disputeChatBox">
+                        <!-- Chat messages injected dynamically -->
+                    </div>
+
+                    <div class="quick-reply-wrapper" id="chatQuickReplies">
+                        <!-- Quick reply chips injected dynamically -->
+                    </div>
+
+                    <div class="search-input-wrapper" style="margin-top:12px;background:#f1f5f2;border-radius:20px;padding:4px 4px 4px 12px">
+                        <input type="text" class="search-bar-input" id="disputeTextInput"
+                            placeholder="Type message in Roman Urdu or English..."
+                            onkeypress="if(event.key==='Enter') sendDisputeMessage()" />
+                        <button class="send-btn" onclick="sendDisputeMessage()" style="width:36px;height:36px">➔</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. MORE / PROFILE TAB VIEW -->
             <div id="profileView" class="tab-view hidden">
                 <div class="profile-header-card">
                     <div class="profile-img-placeholder">👨‍🔧</div>
@@ -1635,6 +1758,10 @@
             <div class="tab-item" id="tab-track" onclick="changeTab('track')">
                 <span class="icon">📍</span>
                 <span class="text">Track</span>
+            </div>
+            <div class="tab-item" id="tab-support" onclick="changeTab('support')">
+                <span class="icon">💬</span>
+                <span class="text">Support</span>
             </div>
             <div class="tab-item" id="tab-profile" onclick="changeTab('profile')">
                 <span class="icon">👤</span>
@@ -1749,11 +1876,11 @@
         // Tab Navigation swapping
         function changeTab(tabName) {
             // Hide all tab views
-            const views = ['homeView', 'resultsView', 'confirmationView', 'bookingsView', 'trackView', 'profileView'];
+            const views = ['homeView', 'resultsView', 'confirmationView', 'bookingsView', 'trackView', 'profileView', 'supportView'];
             views.forEach(v => document.getElementById(v).classList.add('hidden'));
 
             // Remove active style from tabs
-            const tabs = ['tab-home', 'tab-bookings', 'tab-track', 'tab-profile'];
+            const tabs = ['tab-home', 'tab-bookings', 'tab-track', 'tab-support', 'tab-profile'];
             tabs.forEach(t => document.getElementById(t).classList.remove('active'));
 
             // Reset scroll
@@ -1771,6 +1898,10 @@
                 loadTrackerState();
                 document.getElementById('trackView').classList.remove('hidden');
                 document.getElementById('tab-track').classList.add('active');
+            } else if (tabName === 'support') {
+                renderDisputeHistory();
+                document.getElementById('supportView').classList.remove('hidden');
+                document.getElementById('tab-support').classList.add('active');
             } else if (tabName === 'profile') {
                 document.getElementById('profileView').classList.remove('hidden');
                 document.getElementById('tab-profile').classList.add('active');
@@ -2191,6 +2322,38 @@
             triggerArrivalUI();
         }
 
+        function triggerMockCancellation() {
+            if (activeTrackerInterval) clearInterval(activeTrackerInterval);
+            
+            const originalUstaad = currentBooking.providerName;
+            
+            // Show cancellation status on Tracker overlay
+            document.getElementById('gpsStatusHeadline').textContent = `🚨 ${originalUstaad} Cancelled!`;
+            document.getElementById('gpsSubText').textContent = `Finding next best available provider automatically...`;
+            document.getElementById('gpsMinutesAway').textContent = 'RE-ROUTING';
+            document.getElementById('gpsMinutesAway').style.background = '#e53935';
+            
+            const marker = document.getElementById('gpsVehicleMarker');
+            marker.style.animation = 'none'; // Pause car driving
+            
+            // Simulate 2.5s autonomous search & rebooking
+            setTimeout(() => {
+                const replacementName = originalUstaad === 'Zahid Mahmood' ? 'Tariq Mughal' : 'Zahid Mahmood';
+                const vehicleEmoji = replacementName === 'Zahid Mahmood' ? '🚗' : '🛠️';
+                
+                // Update active booking details
+                currentBooking.providerName = replacementName;
+                currentBooking.vehicleEmoji = vehicleEmoji;
+                updateHistoryStatus(currentBooking.confirmNum, currentBooking);
+                
+                // Alert popup showing off full automation
+                alert(`🔄 Auto-Rebooked successfully!\n${originalUstaad} was replaced by ${replacementName} at original rate with zero human intervention.`);
+                
+                // Restart transit simulation with new provider
+                startTransitSimulation();
+            }, 2500);
+        }
+
         function viewLiveTracker() {
             changeTab('track');
         }
@@ -2311,6 +2474,215 @@
 
         function openSidebar() {
             alert("Menu Options: Wallet, Payments, Live Help, Referral Rewards. Coming soon to KarobarAI!");
+        }
+
+        // Dispute Resolution & Live Support System
+        let activeDisputeBooking = null;
+
+        function renderDisputeHistory() {
+            const container = document.getElementById('disputeBookingsList');
+            container.innerHTML = '';
+            
+            const history = JSON.parse(localStorage.getItem('karobar_history') || '[]');
+            
+            if (history.length === 0) {
+                container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-muted)">
+                    <span style="font-size:48px">💬</span>
+                    <div style="font-family:'Outfit',sans-serif;font-weight:700;margin-top:12px;color:var(--text-main)">No orders found</div>
+                    <div style="font-size:12px;margin-top:6px">Disputes can be reported for active or completed bookings.</div>
+                </div>`;
+                return;
+            }
+
+            history.forEach(b => {
+                const card = document.createElement('div');
+                card.className = 'history-card';
+                card.style.cursor = 'pointer';
+                card.onclick = () => startDisputeChat(b);
+
+                card.innerHTML = `
+                    <div class="history-icon-circle">${b.vehicleEmoji || '👨‍🔧'}</div>
+                    <div class="history-meta">
+                        <div class="history-title" style="font-weight:700">${b.providerName} (${b.serviceType})</div>
+                        <div class="history-date">${b.date} • Rs ${b.price}/hr • ID: ${b.confirmNum}</div>
+                    </div>
+                    <button class="action-btn-green" style="width:auto;font-size:11px;padding:6px 12px;margin-left:auto">Report</button>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        function startDisputeChat(booking) {
+            activeDisputeBooking = booking;
+            document.getElementById('disputeSelectionContainer').classList.add('hidden');
+            document.getElementById('disputeChatContainer').classList.remove('hidden');
+            document.getElementById('chatUstaadName').textContent = `Dispute: ${booking.providerName}`;
+            
+            const chatBox = document.getElementById('disputeChatBox');
+            chatBox.innerHTML = '';
+            
+            // System init message
+            appendChatMessage("system", `Automated Dispute Resolution Initialized<br>Booking ID: ${booking.confirmNum} • Ustaad: ${booking.providerName}`);
+            
+            // Support agent greeting
+            setTimeout(() => {
+                appendChatMessage("agent", `Assalam-o-Alaikum! Mein Karobar AI Support Agent hoon. Aapko <b>${booking.providerName}</b> (${booking.serviceType}) ke order ke baare mein kya masla pesh aaya? Please select from the options below:`);
+                showDisputeOptions();
+            }, 500);
+        }
+
+        function exitDisputeChat() {
+            activeDisputeBooking = null;
+            document.getElementById('disputeChatContainer').classList.add('hidden');
+            document.getElementById('disputeSelectionContainer').classList.remove('hidden');
+            renderDisputeHistory();
+        }
+
+        function appendChatMessage(sender, text) {
+            const chatBox = document.getElementById('disputeChatBox');
+            const msg = document.createElement('div');
+            
+            if (sender === 'system') {
+                msg.className = 'chat-system-msg';
+                msg.innerHTML = text;
+            } else {
+                msg.className = `chat-msg ${sender}`;
+                msg.innerHTML = text;
+            }
+            
+            chatBox.appendChild(msg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function showDisputeOptions() {
+            const container = document.getElementById('chatQuickReplies');
+            container.innerHTML = `
+                <div class="quick-reply-chip" onclick="handleDisputeSelection('no-show')">🚫 Ustaad nahi aya (No-Show)</div>
+                <div class="quick-reply-chip" onclick="handleDisputeSelection('price')">💰 Rate zyaada maang raha hai</div>
+                <div class="quick-reply-chip" onclick="handleDisputeSelection('quality')">📉 Kaam sahi nahi kiya (Quality Issue)</div>
+            `;
+        }
+
+        function handleDisputeSelection(type) {
+            const container = document.getElementById('chatQuickReplies');
+            container.innerHTML = ''; 
+            
+            if (type === 'no-show') {
+                appendChatMessage("user", "Ustaad nahi aya (No-Show)");
+                showTypingIndicator();
+                
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    appendChatMessage("agent", `Checking real-time GPS transit coordinates for <b>${activeDisputeBooking.providerName}</b>...`);
+                    
+                    setTimeout(() => {
+                        appendChatMessage("agent", `<b>❌ No-Show Confirmed:</b> GPS coordinates show that the provider did not arrive at your location. We sincerely apologize for this inconvenience!`);
+                        appendChatMessage("agent", `<b>🔄 Resolution Action:</b> We have cancelled this booking. A **Rs 200 compensation voucher** has been credited to your Karobar Wallet, and a warning strike has been registered on the ustaad's record. Aap home screen se doosra ustaad book kar sakte hain.`);
+                        
+                        activeDisputeBooking.status = 'cancelled';
+                        updateHistoryStatus(activeDisputeBooking.confirmNum, activeDisputeBooking);
+                    }, 1200);
+                }, 1000);
+            } 
+            else if (type === 'price') {
+                appendChatMessage("user", "Rate zyaada maang raha hai");
+                showTypingIndicator();
+                
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    appendChatMessage("agent", `Aap ka original estimated rate <b>Rs ${activeDisputeBooking.price}/hr</b> tha. Agar provider extra paise maang raha hai, please extra amount niche chat box mein likhein ya select karein:`);
+                    container.innerHTML = `
+                        <div class="quick-reply-chip" onclick="submitExtraPrice(300)">Rs 300 extra maange</div>
+                        <div class="quick-reply-chip" onclick="submitExtraPrice(500)">Rs 500 extra maange</div>
+                    `;
+                }, 1000);
+            }
+            else if (type === 'quality') {
+                appendChatMessage("user", "Kaam sahi nahi kiya (Quality Issue)");
+                showTypingIndicator();
+                
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    appendChatMessage("agent", `KarobarAI provides a **7-Day Quality Warranty** on all jobs! We have <b>PAUSED payment settlement</b> to <b>${activeDisputeBooking.providerName}</b>.`);
+                    appendChatMessage("agent", `We are scheduling a Senior Inspection Ustaad to visit your address tomorrow at **10:00 AM** to inspect and resolve your complaints completely **FREE of charge**. Is that alright?`);
+                    
+                    container.innerHTML = `
+                        <div class="quick-reply-chip" onclick="confirmQualityWarranty(true)">Yes, Kal 10 AM theek hai</div>
+                        <div class="quick-reply-chip" onclick="confirmQualityWarranty(false)">No, just refund me</div>
+                    `;
+                }, 1000);
+            }
+        }
+
+        function submitExtraPrice(amount) {
+            document.getElementById('chatQuickReplies').innerHTML = '';
+            appendChatMessage("user", `Rs ${amount} extra maange`);
+            showTypingIndicator();
+            
+            setTimeout(() => {
+                hideTypingIndicator();
+                appendChatMessage("agent", `<b>💰 Price Dispute Resolved:</b> We have initiated an automatic refund of <b>Rs ${amount}</b> directly to your EasyPaisa wallet linked with +92 300 1234567.`);
+                appendChatMessage("agent", `A warning strike has been registered on the ustaad's profile. Settled successfully!`);
+            }, 1200);
+        }
+
+        function confirmQualityWarranty(accepted) {
+            document.getElementById('chatQuickReplies').innerHTML = '';
+            if (accepted) {
+                appendChatMessage("user", "Yes, Kal 10 AM theek hai");
+                showTypingIndicator();
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    appendChatMessage("agent", `<b>🛠️ Inspection Scheduled:</b> Done! Senior inspector will arrive tomorrow at 10 AM. We will ensure the quality is perfectly corrected. Thank you for your cooperation!`);
+                }, 1000);
+            } else {
+                appendChatMessage("user", "No, just refund me");
+                showTypingIndicator();
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    appendChatMessage("agent", `Maazrat! We have credited <b>Rs 500 refund</b> to your Karobar Wallet and fully paused payment to the ustaad. We hope to serve you better next time.`);
+                }, 1000);
+            }
+        }
+
+        function showTypingIndicator() {
+            const chatBox = document.getElementById('disputeChatBox');
+            const ind = document.createElement('div');
+            ind.id = 'chatTypingIndicator';
+            ind.className = 'chat-system-msg';
+            ind.style.fontStyle = 'italic';
+            ind.textContent = 'Karobar Support is typing...';
+            chatBox.appendChild(ind);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const ind = document.getElementById('chatTypingIndicator');
+            if (ind) ind.remove();
+        }
+
+        function sendDisputeMessage() {
+            const input = document.getElementById('disputeTextInput');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            appendChatMessage("user", text);
+            input.value = '';
+            
+            showTypingIndicator();
+            
+            setTimeout(() => {
+                hideTypingIndicator();
+                appendChatMessage("agent", `Aap ki request receive ho gayi hai. Mein automated system ke zariye iska hal nikalta hoon. Please follow prompt options or select quick replies for instant settlement!`);
+                showDisputeOptions();
+            }, 1000);
+        }
+
+        function updateHistoryStatus(confirmNum, updatedBooking) {
+            let history = JSON.parse(localStorage.getItem('karobar_history') || '[]');
+            history = history.map(b => b.confirmNum === confirmNum ? updatedBooking : b);
+            localStorage.setItem('karobar_history', JSON.stringify(history));
         }
 
         // Initial launch routines
