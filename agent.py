@@ -34,6 +34,8 @@ class KarobarAIAgent:
         print("\nWelcome to KarobarAI! How can I help you today?")
         print("(Type 'exit' to quit)\n")
         
+        followup_count = 0
+        
         while True:
             user_input = input("You: ")
             if user_input.lower() in ['exit', 'quit']:
@@ -42,9 +44,20 @@ class KarobarAIAgent:
             parsed = self.nlu.parse_request(user_input)
             
             if not parsed or parsed.get('confidence_score', 0) < 0.7:
-                followup = parsed.get('followup_question') if parsed else "Could you please provide more details?"
-                print(f"KarobarAI: {followup}")
+                followup_count += 1
+                if followup_count >= 2:
+                    print("KarobarAI: I'm still having trouble understanding. Please choose from our available services:")
+                    services = sorted(list(set([p['service'] for p in self.matcher.providers])))
+                    for i, s in enumerate(services):
+                        print(f"  {i+1}. {s}")
+                    print("Please tell me which service you need and your city.")
+                    followup_count = 0
+                else:
+                    followup = parsed.get('followup_question') if parsed else "Could you please provide more details?"
+                    print(f"KarobarAI: {followup}")
                 continue
+            
+            followup_count = 0
                 
             service_type = parsed.get('service_type')
             city = parsed.get('city')
