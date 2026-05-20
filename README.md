@@ -1,7 +1,11 @@
 # KarobarAI 🇵🇰
 **AI Service Orchestrator for Pakistan's Informal Economy**
 
-KarobarAI is an agentic AI system that automates the end-to-end lifecycle of home service requests in Pakistan — from natural language input to provider matching, booking, check-out, live GPS tracking, and automated dispute resolution.
+KarobarAI is an AI-powered platform designed to modernize Pakistan’s informal home services market by enabling users to find and book trusted local service providers through natural language interaction.
+
+Instead of relying on WhatsApp messages, phone calls, or personal referrals, users can simply describe their issue in English, Urdu, or Roman Urdu, and the system automatically handles provider matching, pricing, booking, tracking, and support workflows.
+
+KarobarAI brings the simplicity of ride-hailing platforms such as Careem and Bykea to the home services sector.
 
 ## Live Production Deployment
 Experience the fully responsive mobile PWA prototype live on your phone or browser:
