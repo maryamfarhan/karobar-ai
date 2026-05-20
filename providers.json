@@ -245,5 +245,18 @@
     "on_time_score": 0.91,
     "cancellation_rate": 0.06,
     "experience_years": 7
+  },
+  {
+    "id": "p020",
+    "name": "Javed Iqbal",
+    "service": "Carpenter",
+    "area": "Clifton",
+    "city": "Karachi",
+    "rating": 4.85,
+    "price_per_hour": 950,
+    "available": true,
+    "on_time_score": 0.96,
+    "cancellation_rate": 0.02,
+    "experience_years": 11
   }
 ]
